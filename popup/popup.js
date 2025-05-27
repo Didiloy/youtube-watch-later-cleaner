@@ -152,20 +152,21 @@ class PopupManager {
 
   async refreshVideosList() {
     const btn = document.getElementById('refreshVideos');
+    const originalText = browser.i18n.getMessage('popupRefreshList') || 'Refresh List';
+    const refreshingText = browser.i18n.getMessage('refreshingList') || 'Refreshing...';
+
     btn.disabled = true;
-    btn.textContent = 'Refreshing...';
+    btn.textContent = refreshingText;
 
     try {
       await this.loadCleanedVideos();
       this.renderCleanedVideos();
-      this.showStatus('Video list refreshed', 'success');
     } catch (error) {
       console.error('Failed to refresh:', error);
-      this.showStatus('Failed to refresh video list', 'error');
     }
 
     btn.disabled = false;
-    btn.textContent = 'Refresh List';
+    btn.textContent = originalText;
   }
 
   async clearHistory() {
