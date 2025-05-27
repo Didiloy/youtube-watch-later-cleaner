@@ -92,46 +92,50 @@ class PopupManager {
 
   renderCleanedVideos() {
     const container = document.getElementById('cleanedVideosList');
-    const noVideos = document.getElementById('noVideos');
+    const noVideosMessage = document.getElementById('noVideos');
     const clearBtn = document.getElementById('clearHistory');
 
-    container.innerHTML = '';
-
-    if (this.cleanedVideos.length === 0) {
-      noVideos.style.display = 'block';
-      clearBtn.style.display = 'none';
-      container.appendChild(noVideos);
-      return;
+    while (container.firstChild && container.firstChild !== noVideosMessage) {
+      container.removeChild(container.firstChild);
     }
 
-    noVideos.style.display = 'none';
-    clearBtn.style.display = 'block';
+    if (this.cleanedVideos.length === 0) {
+      noVideosMessage.style.display = 'block';
+      clearBtn.style.display = 'none';
+    } else {
+      noVideosMessage.style.display = 'none';
+      clearBtn.style.display = 'block';
 
-    this.cleanedVideos.slice(0, 20).forEach(video => {
-      const videoItem = document.createElement('a');
-      videoItem.className = 'video-item';
-      videoItem.href = video.url || '#';
-      videoItem.title = video.url ? `Open video: ${video.title}` : 'Video URL not available';
-      videoItem.target = '_blank';
-      videoItem.rel = 'noopener noreferrer';
+      this.cleanedVideos.slice(0, 20).forEach(video => {
+        const videoItem = document.createElement('a');
+        videoItem.className = 'video-item';
+        videoItem.href = video.url || '#';
+        videoItem.title = video.url ? `Open video: ${video.title}` : 'Video URL not available';
+        videoItem.target = '_blank';
+        videoItem.rel = 'noopener noreferrer';
 
-      if (!video.url || video.url === '#') {
-        videoItem.addEventListener('click', (e) => e.preventDefault());
-        videoItem.style.cursor = 'default';
-      }
+        if (!video.url || video.url === '#') {
+          videoItem.addEventListener('click', (e) => e.preventDefault());
+          videoItem.style.cursor = 'default';
+        }
 
-      const title = document.createElement('div');
-      title.className = 'video-title';
-      title.textContent = video.title || 'Unknown Video';
+        const title = document.createElement('div');
+        title.className = 'video-title';
+        title.textContent = video.title || 'Unknown Video';
 
-      const date = document.createElement('div');
-      date.className = 'video-date';
-      date.textContent = this.formatDate(video.cleanedAt);
+        const date = document.createElement('div');
+        date.className = 'video-date';
+        date.textContent = this.formatDate(video.cleanedAt);
 
-      videoItem.appendChild(title);
-      videoItem.appendChild(date);
-      container.appendChild(videoItem);
-    });
+        videoItem.appendChild(title);
+        videoItem.appendChild(date);
+        if (noVideosMessage.parentNode === container) {
+            container.insertBefore(videoItem, noVideosMessage);
+        } else {
+            container.appendChild(videoItem);
+        }
+      });
+    }
   }
 
   formatDate(dateString) {
