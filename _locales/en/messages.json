@@ -6,7 +6,7 @@
     "message": "Clean your YouTube Watch Later playlist by removing seen videos based on progress bar detection"
   },
   "popupTitle": {
-    "message": "Watch Later DOM Cleaner"
+    "message": "YouTube Watch Later Cleaner"
   },
   "settingsEnableFeature": {
     "message": "Activate Cleaner on Watch Later Page (Requires page reload)"

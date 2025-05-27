@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "__MSG_extensionName__",
+  "name": "YouTube Watch Later Cleaner",
   "version": "1.0.0",
-  "description": "__MSG_extensionDescription__",
+  "description": "Clean your YouTube Watch Later page by removing watched videos.",
   "default_locale": "en",
   
   "permissions": [
@@ -30,7 +30,7 @@
   
   "browser_action": {
     "default_popup": "popup/popup.html",
-    "default_title": "__MSG_extensionName__",
+    "default_title": "YouTube Watch Later Cleaner",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png",
