@@ -138,6 +138,7 @@ class YouTubeWatchLaterCleaner {
 
     document.body.appendChild(this.sidebar);
     this.setupSidebarEvents();
+    this.makeSidebarDraggable();
   }
 
   setupSidebarEvents() {
@@ -146,6 +147,54 @@ class YouTubeWatchLaterCleaner {
     cleanBtn?.addEventListener('click', () => {
       this.startCleaning();
     });
+  }
+
+  makeSidebarDraggable() {
+    const sidebar = this.sidebar;
+    const header = sidebar.querySelector('.wl-sidebar-header');
+    let offsetX, offsetY, isDragging = false;
+
+    if (!header) return;
+
+    header.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      // Calculate offset from the top-left of the sidebar element, not the viewport
+      offsetX = e.clientX - sidebar.offsetLeft;
+      offsetY = e.clientY - sidebar.offsetTop;
+      
+      // Prevent text selection while dragging
+      e.preventDefault(); 
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+
+    const onMouseMove = (e) => {
+      if (!isDragging) return;
+
+      let newLeft = e.clientX - offsetX;
+      let newTop = e.clientY - offsetY;
+
+      // Constrain to viewport
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const sidebarWidth = sidebar.offsetWidth;
+      const sidebarHeight = sidebar.offsetHeight;
+
+      if (newLeft < 0) newLeft = 0;
+      if (newTop < 0) newTop = 0;
+      if (newLeft + sidebarWidth > viewportWidth) newLeft = viewportWidth - sidebarWidth;
+      if (newTop + sidebarHeight > viewportHeight) newTop = viewportHeight - sidebarHeight;
+
+      sidebar.style.left = newLeft + 'px';
+      sidebar.style.top = newTop + 'px';
+    };
+
+    const onMouseUp = () => {
+      isDragging = false;
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
   }
 
   // Helper for updating sidebar status message consistently
