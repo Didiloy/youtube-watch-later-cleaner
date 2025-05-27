@@ -39,7 +39,7 @@
     "message": "Nettoyer Maintenant"
   },
   "cleaningLog": {
-    "message": "Journal de nettoyage :"
+    "message": "Journal de nettoyage "
   },
   "failed": {
     "message": "échoué"
