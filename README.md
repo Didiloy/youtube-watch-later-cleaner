@@ -13,11 +13,10 @@ A Firefox extension that automatically detects and removes "seen" videos from yo
 ### 🎛️ User-Friendly Interface
 - **Floating Sidebar**: Quick access to cleaning functions directly on YouTube
 - **Extension Popup**: Dashboard with settings and cleaned video history
-- **Options Page**: Comprehensive settings management
 - **Toast Notifications**: Real-time feedback when videos are removed
 
 ### 🔧 Customizable Settings
-- Enable/disable floating sidebar
+- Enable/disable the scanning of the extension
 - Confirmation prompts before cleaning
 - Adjustable "seen" threshold percentage
 - Toast notification toggle
@@ -49,37 +48,6 @@ A Firefox extension that automatically detects and removes "seen" videos from yo
 2. Confirm the action if confirmation is enabled
 3. Watch as seen videos are automatically removed
 
-### Settings Management
-- **Extension Icon**: Click the extension icon in the toolbar for quick settings
-- **Options Page**: Right-click the extension icon → "Options" for detailed settings
-- **Sidebar Settings**: Click "Settings" in the floating sidebar
-
-## File Structure
-
-```
-youtube-watch-later-cleaner/
-├── manifest.json                 # Extension manifest
-├── background/
-│   └── background.js            # Background script for settings management
-├── content/
-│   ├── content.js              # Main content script for YouTube integration
-│   └── content.css             # Styles for sidebar and visual elements
-├── popup/
-│   ├── popup.html              # Extension popup interface
-│   ├── popup.css               # Popup styles
-│   └── popup.js                # Popup functionality
-├── options/
-│   ├── options.html            # Options page interface
-│   ├── options.css             # Options page styles
-│   └── options.js              # Options page functionality
-├── _locales/
-│   ├── en/
-│   │   └── messages.json       # English translations
-│   └── fr/
-│       └── messages.json       # French translations
-├── icons/                      # Extension icons (to be added)
-└── README.md                   # This file
-```
 
 ## Technical Details
 
@@ -119,18 +87,12 @@ youtube-watch-later-cleaner/
 3. Make changes to the code
 4. Click "Reload" in the debugging interface to test changes
 
-### Building for Production
-1. Ensure all files are present and functional
-2. Test thoroughly on different YouTube page states
-3. Validate manifest.json syntax
-4. Package as .zip file for submission to Firefox Add-ons
 
 ## Limitations
 
 - **DOM Fragility**: YouTube's frequent UI changes may require updates
 - **Performance**: Large playlists may take time to scan completely
 - **Browser Support**: Designed specifically for Firefox (Manifest V2)
-- **YouTube Changes**: Dependent on YouTube's current DOM structure
 
 ## Troubleshooting
 
@@ -144,11 +106,6 @@ youtube-watch-later-cleaner/
 2. Ensure videos have visible progress bars
 3. Scroll down to load more videos
 
-### Cleaning Failures
-1. Check browser console for error messages
-2. Verify YouTube's UI hasn't changed significantly
-3. Try refreshing the page and scanning again
-
 ## Contributing
 
 This extension is open for improvements and bug fixes. Common areas for contribution:
@@ -159,14 +116,6 @@ This extension is open for improvements and bug fixes. Common areas for contribu
 
 ## License
 
-This project is provided as-is for educational and personal use. Please respect YouTube's Terms of Service when using this extension.
+This project is licensed under the terms of the GNU General Public License v3.0. 
+See the [LICENSE](LICENSE) file for the full license text.
 
-## Version History
-
-### v1.0.0
-- Initial release
-- Core cleaning functionality
-- Multi-language support (EN/FR)
-- Floating sidebar interface
-- Settings management
-- Local storage for preferences and history 
