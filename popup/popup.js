@@ -108,8 +108,17 @@ class PopupManager {
     clearBtn.style.display = 'block';
 
     this.cleanedVideos.slice(0, 20).forEach(video => {
-      const videoItem = document.createElement('div');
+      const videoItem = document.createElement('a');
       videoItem.className = 'video-item';
+      videoItem.href = video.url || '#';
+      videoItem.title = video.url ? `Open video: ${video.title}` : 'Video URL not available';
+      videoItem.target = '_blank';
+      videoItem.rel = 'noopener noreferrer';
+
+      if (!video.url || video.url === '#') {
+        videoItem.addEventListener('click', (e) => e.preventDefault());
+        videoItem.style.cursor = 'default';
+      }
 
       const title = document.createElement('div');
       title.className = 'video-title';
