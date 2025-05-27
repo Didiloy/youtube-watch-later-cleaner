@@ -109,5 +109,8 @@
   },
   "analyzingVideoContent": {
     "message": "Analyse du contenu vidéo..."
+  },
+  "sidebarNextHighlight": {
+    "message": "Vidéo suivante"
   }
 } 

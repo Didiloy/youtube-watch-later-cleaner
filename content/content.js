@@ -8,6 +8,7 @@ class YouTubeWatchLaterCleaner {
     this.lastCleanedCount = 0;
     this.failedCleanings = [];
     this.loadedMessages = {};
+    this.currentHighlightIndex = -1; // To track the current highlighted video for "Next"
     
     this.initialize();
   }
@@ -126,6 +127,9 @@ class YouTubeWatchLaterCleaner {
           <button id="wl-clean-btn" class="wl-btn wl-btn-primary" disabled>
             ${this.getMsg('cleanNow')}
           </button>
+          <button id="wl-next-highlight-btn" class="wl-btn wl-btn-secondary" disabled data-i18n-key="sidebarNextHighlight">
+            ${this.getMsg('sidebarNextHighlight')}
+          </button>
         </div>
         <div class="wl-log" id="wl-log">
           <div class="wl-log-title">${this.getMsg('cleaningLog')}:</div>
@@ -143,9 +147,14 @@ class YouTubeWatchLaterCleaner {
 
   setupSidebarEvents() {
     const cleanBtn = document.getElementById('wl-clean-btn');
+    const nextHighlightBtn = document.getElementById('wl-next-highlight-btn');
 
     cleanBtn?.addEventListener('click', () => {
       this.startCleaning();
+    });
+
+    nextHighlightBtn?.addEventListener('click', () => {
+      this.scrollToNextHighlight();
     });
   }
 
@@ -195,6 +204,8 @@ class YouTubeWatchLaterCleaner {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
     };
+
+    this.highlightSeenVideos();
   }
 
   // Helper for updating sidebar status message consistently
@@ -457,25 +468,31 @@ class YouTubeWatchLaterCleaner {
     videoToToggle.deselected = !videoToToggle.deselected;
     videoToToggle.element.classList.toggle('wl-deselected-highlight', videoToToggle.deselected);
     this.updateSidebarStatus(); // Update count of videos to be cleaned
+    this.currentHighlightIndex = -1; // Reset index as selection changed
   }
 
   updateSidebarStatus() {
     const statusEl = document.getElementById('wl-status');
     const cleanBtn = document.getElementById('wl-clean-btn');
+    const nextHighlightBtn = document.getElementById('wl-next-highlight-btn');
+
     const currentlySelectedVideos = this.seenVideos.filter(v => !v.deselected);
     const numSelected = currentlySelectedVideos.length;
 
-    if (statusEl) {
-      if (this.seenVideos.length === 0) { // No videos detected at all
-        statusEl.textContent = this.getMsg('noVideosToClean');
-        cleanBtn?.setAttribute('disabled', 'true');
-      } else if (numSelected === 0) { // Videos detected, but all are deselected
-        statusEl.textContent = this.getMsg('noVideosSelectedForCleaning');
-        cleanBtn?.setAttribute('disabled', 'true');
-      } else {
-        statusEl.textContent = this.getMsg('videosSelectedForCleaning').replace('{count}', numSelected);
-        cleanBtn?.removeAttribute('disabled');
-      }
+    if (this.seenVideos.length === 0) { // No videos detected at all
+      if (statusEl) statusEl.textContent = this.getMsg('noVideosToClean');
+      cleanBtn?.setAttribute('disabled', 'true');
+      nextHighlightBtn?.setAttribute('disabled', 'true');
+      this.currentHighlightIndex = -1;
+    } else if (numSelected === 0) { // Videos detected, but all are deselected
+      if (statusEl) statusEl.textContent = this.getMsg('noVideosSelectedForCleaning');
+      cleanBtn?.setAttribute('disabled', 'true');
+      nextHighlightBtn?.setAttribute('disabled', 'true');
+      this.currentHighlightIndex = -1;
+    } else {
+      if (statusEl) statusEl.textContent = this.getMsg('videosSelectedForCleaning').replace('{count}', numSelected);
+      cleanBtn?.removeAttribute('disabled');
+      nextHighlightBtn?.removeAttribute('disabled');
     }
   }
 
@@ -495,6 +512,7 @@ class YouTubeWatchLaterCleaner {
     this.cleaningInProgress = true;
     this.failedCleanings = [];
     this.lastCleanedCount = 0;
+    this.currentHighlightIndex = -1; // Reset before cleaning
 
     const statusEl = document.getElementById('wl-status');
     const cleanBtn = document.getElementById('wl-clean-btn');
@@ -745,6 +763,29 @@ class YouTubeWatchLaterCleaner {
         }
     }
     return message;
+  }
+
+  scrollToNextHighlight() {
+    const selectedVideos = this.seenVideos.filter(v => !v.deselected);
+    if (selectedVideos.length === 0) {
+      this.currentHighlightIndex = -1; // Reset if no selected videos
+      return;
+    }
+
+      this.currentHighlightIndex++;
+      if (this.currentHighlightIndex >= selectedVideos.length) {
+        this.currentHighlightIndex = 0; // Loop back to the first
+      }
+
+    const videoToScrollTo = selectedVideos[this.currentHighlightIndex];
+    if (videoToScrollTo && videoToScrollTo.element) {
+      videoToScrollTo.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Optionally, add a temporary visual cue to the scrolled-to video
+      videoToScrollTo.element.classList.add('wl-current-scroll-target');
+      setTimeout(() => {
+        videoToScrollTo.element.classList.remove('wl-current-scroll-target');
+      }, 1500); // Remove cue after 1.5s
+    }
   }
 }
 
