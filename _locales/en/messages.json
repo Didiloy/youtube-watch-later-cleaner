@@ -79,5 +79,35 @@
   },
   "confirmCleanSelected": {
     "message": "Are you sure you want to remove {count} selected videos from Watch Later?"
+  },
+  "popupRefreshList": {
+    "message": "Refresh List"
+  },
+  "popupClearHistory": {
+    "message": "Clear History"
+  },
+  "maxScrollAttemptsReachedLoading": {
+    "message": "Max scroll attempts reached while loading. Found {count} videos."
+  },
+  "initialVideoLoadingComplete": {
+    "message": "Initial video loading complete. Found {count} videos. Preparing detailed scan..."
+  },
+  "preparingScrollScan": {
+    "message": "Preparing to scan all videos by scrolling..."
+  },
+  "noVideosForScrollScan": {
+    "message": "No videos found to scan by scrolling."
+  },
+  "scrollScanProgress": {
+    "message": "Scanning playlist: Scrolling ({percent}% complete) to ensure video {current}/{total} renders."
+  },
+  "scrollScanReachedBottom": {
+    "message": "Scanning playlist: Reached bottom. Scrolling back to top..."
+  },
+  "viewportScanComplete": {
+    "message": "Viewport scan complete. Analyzing videos for cleaning..."
+  },
+  "analyzingVideoContent": {
+    "message": "Analyzing video content..."
   }
 } 

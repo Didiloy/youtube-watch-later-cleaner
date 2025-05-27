@@ -204,11 +204,40 @@ class PopupManager {
     }, 3000);
   }
 
-  localizeInterface() {
+  async localizeInterface() {
     const elements = document.querySelectorAll('[data-i18n]');
+    const targetLang = this.settings.language || 'en';
+    let messages = {};
+
+    try {
+      // Attempt to fetch the specific language file if not English (default)
+      // browser.i18n.getMessage will handle English or browser default automatically if targetLang is 'en'
+      // or if the specific fetch fails and we fall back.
+      if (targetLang !== 'en') { 
+        const response = await fetch(browser.runtime.getURL(`_locales/${targetLang}/messages.json`));
+        if (response.ok) {
+          messages = await response.json();
+        } else {
+          // Fallback to default i18n if specific lang file fails to load (e.g. not found)
+          console.warn(`Could not load messages for ${targetLang}, falling back to default i18n.`);
+        }
+      }
+    } catch (error) {
+      console.error(`Error loading messages for ${targetLang}:`, error);
+      // Fallback to default i18n on any error
+    }
+
     elements.forEach(element => {
       const key = element.getAttribute('data-i18n');
-      const message = browser.i18n.getMessage(key);
+      let message = '';
+
+      if (messages[key] && messages[key].message) {
+        message = messages[key].message;
+      } else {
+        // Fallback to browser.i18n.getMessage() if key not in loaded file or if it's default lang
+        message = browser.i18n.getMessage(key);
+      }
+      
       if (message) {
         if (element.tagName === 'INPUT' && element.type === 'button') {
           element.value = message;

@@ -79,5 +79,35 @@
   },
   "confirmCleanSelected": {
     "message": "Êtes-vous sûr de vouloir supprimer les {count} vidéos sélectionnées d'À Regarder Plus Tard ?"
+  },
+  "popupRefreshList": {
+    "message": "Rafraîchir la liste"
+  },
+  "popupClearHistory": {
+    "message": "Effacer l'historique"
+  },
+  "maxScrollAttemptsReachedLoading": {
+    "message": "Nombre maximal de tentatives de défilement atteint lors du chargement. {count} vidéos trouvées."
+  },
+  "initialVideoLoadingComplete": {
+    "message": "Chargement initial des vidéos terminé. {count} vidéos trouvées. Préparation de l'analyse détaillée..."
+  },
+  "preparingScrollScan": {
+    "message": "Préparation de l'analyse de toutes les vidéos par défilement..."
+  },
+  "noVideosForScrollScan": {
+    "message": "Aucune vidéo trouvée à analyser par défilement."
+  },
+  "scrollScanProgress": {
+    "message": "Analyse de la playlist : Défilement ({percent}% terminé) pour assurer le rendu de la vidéo {current}/{total}."
+  },
+  "scrollScanReachedBottom": {
+    "message": "Analyse de la playlist : Bas de page atteint. Défilement vers le haut..."
+  },
+  "viewportScanComplete": {
+    "message": "Analyse du viewport terminée. Analyse des vidéos pour nettoyage..."
+  },
+  "analyzingVideoContent": {
+    "message": "Analyse du contenu vidéo..."
   }
 } 

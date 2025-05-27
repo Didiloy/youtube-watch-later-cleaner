@@ -7,6 +7,7 @@ class YouTubeWatchLaterCleaner {
     this.toastContainer = null;
     this.lastCleanedCount = 0;
     this.failedCleanings = [];
+    this.loadedMessages = {};
     
     this.initialize();
   }
@@ -17,6 +18,7 @@ class YouTubeWatchLaterCleaner {
     }
 
     await this.loadSettings();
+    await this._loadCurrentLanguageMessages();
 
     // If the main feature is disabled, do nothing further on the page.
     if (!this.settings.enableSidebar) {
@@ -29,11 +31,36 @@ class YouTubeWatchLaterCleaner {
     // Only create sidebar and proceed if the feature is enabled.
     // This check is somewhat redundant due to the one above, but good for clarity.
     if (this.settings.enableSidebar) { 
-      this.createSidebar();
+      await this.createSidebar();
     }
     
     this.scanForSeenVideos();
     this.setupPageObserver();
+  }
+
+  async _loadCurrentLanguageMessages() {
+    const targetLang = this.settings.language || 'en';
+    // Clear previously loaded messages for other languages to avoid mix-ups if language is switched.
+    // this.loadedMessages should be an object where keys are lang codes.
+    this.loadedMessages = {}; 
+
+    if (targetLang !== 'en') {
+      try {
+        const response = await fetch(browser.runtime.getURL(`_locales/${targetLang}/messages.json`));
+        if (response.ok) {
+          this.loadedMessages[targetLang] = await response.json();
+          console.log(`[YT WL Cleaner] Successfully loaded messages for ${targetLang}`);
+        } else {
+          console.warn(`[YT WL Cleaner] Could not load messages for ${targetLang}. Will fall back to default. Status: ${response.status}`);
+          delete this.loadedMessages[targetLang]; // Ensure it's clean for fallback in getMsg
+        }
+      } catch (error) {
+        console.error(`[YT WL Cleaner] Error loading messages for ${targetLang}:`, error);
+        delete this.loadedMessages[targetLang]; // Ensure it's clean for fallback in getMsg
+      }
+    }
+    // For 'en', this.loadedMessages will remain empty or only contain other non-en loaded langs.
+    // this.getMsg will handle the 'en' case by falling back to browser.i18n.getMessage().
   }
 
   isWatchLaterPage() {
@@ -80,7 +107,7 @@ class YouTubeWatchLaterCleaner {
     });
   }
 
-  createSidebar() {
+  async createSidebar() {
     if (this.sidebar) {
       this.sidebar.remove();
     }
@@ -89,21 +116,21 @@ class YouTubeWatchLaterCleaner {
     this.sidebar.id = 'wl-cleaner-sidebar';
     this.sidebar.innerHTML = `
       <div class="wl-sidebar-header">
-        <h3>${browser.i18n.getMessage('sidebarTitle')}</h3>
+        <h3>${this.getMsg('sidebarTitle')}</h3>
       </div>
       <div class="wl-sidebar-content">
         <div class="wl-status" id="wl-status">
-          ${browser.i18n.getMessage('scanning')}
+          ${this.getMsg('scanning')}
         </div>
         <div class="wl-actions">
           <button id="wl-clean-btn" class="wl-btn wl-btn-primary" disabled>
-            ${browser.i18n.getMessage('cleanNow')}
+            ${this.getMsg('cleanNow')}
           </button>
         </div>
         <div class="wl-log" id="wl-log">
-          <div class="wl-log-title">${browser.i18n.getMessage('cleaningLog')}:</div>
+          <div class="wl-log-title">${this.getMsg('cleaningLog')}:</div>
           <div class="wl-log-content" id="wl-log-content">
-            No cleaning performed yet.
+            ${this.getMsg('noVideosToClean')}
           </div>
         </div>
       </div>
@@ -125,13 +152,19 @@ class YouTubeWatchLaterCleaner {
   updateSidebarStatusMessage(message) {
     const statusEl = document.getElementById('wl-status');
     if (statusEl) {
-      statusEl.textContent = message;
+      // If message contains typical sentence structure, assume it's pre-formatted.
+      // Otherwise, assume it's a key and try to translate it using this.getMsg.
+      if (message.includes(' ') || message.includes('.') || message.includes(':') || message.includes('(')){
+        statusEl.textContent = message;
+      } else {
+        statusEl.textContent = this.getMsg(message);
+      }
     }
   }
 
   async scanForSeenVideos() {
     this.seenVideos = [];
-    this.updateSidebarStatusMessage(browser.i18n.getMessage('scrollingToLoad')); // Initial message
+    this.updateSidebarStatusMessage('scrollingToLoad'); // Key for scrollingToLoad
 
     // Phase 1: Load all video elements into the DOM
     await this.scrollToLoadAllVideos(); // Uses its own specific status updates
@@ -140,7 +173,7 @@ class YouTubeWatchLaterCleaner {
     await this.performViewportScanAndRenderScroll();
 
     // Phase 3: Actual detection
-    this.updateSidebarStatusMessage("Analyzing video content...");
+    this.updateSidebarStatusMessage(this.getMsg('analyzingVideoContent'));
     await this.sleep(500); // Brief pause for UI update
 
     const videos = document.querySelectorAll('ytd-playlist-video-renderer');
@@ -162,7 +195,7 @@ class YouTubeWatchLaterCleaner {
   }
 
   async scrollToLoadAllVideos() {
-    this.updateSidebarStatusMessage(browser.i18n.getMessage('scrollingToLoad'));
+    this.updateSidebarStatusMessage('scrollingToLoad'); // Use key
 
     let lastVideoCount = 0;
     let stableScrollAttempts = 0; 
@@ -200,40 +233,53 @@ class YouTubeWatchLaterCleaner {
         }
         lastVideoCount = currentVideoCount;
 
-        this.updateSidebarStatusMessage(`${browser.i18n.getMessage('scrollingToLoad')} (${currentVideoCount} videos, attempt ${currentScrollAttempts}/${maxScrollAttempts})`);
+        const scrollMsg = this.getMsg('scrollingToLoad');
+        this.updateSidebarStatusMessage(`${scrollMsg} (${currentVideoCount} videos, attempt ${currentScrollAttempts}/${maxScrollAttempts})`);
     }
 
-    const finalMessage = currentScrollAttempts >= maxScrollAttempts
-        ? `Max scroll attempts reached while loading. Found ${lastVideoCount} videos.`
-        : `Initial video loading complete. Found ${lastVideoCount} videos. Preparing detailed scan...`;
-    this.updateSidebarStatusMessage(finalMessage);
+    const finalLoadingMessageKey = currentScrollAttempts >= maxScrollAttempts
+        ? 'maxScrollAttemptsReachedLoading'
+        : 'initialVideoLoadingComplete';
+
+    let finalMsgText = this.getMsg(finalLoadingMessageKey);
+    // Fallback if keys are somehow missing, though they should be there
+    if (!finalMsgText || finalMsgText === finalLoadingMessageKey) {
+        finalMsgText = currentScrollAttempts >= maxScrollAttempts 
+            ? `Max scroll attempts reached while loading. Found ${lastVideoCount} videos.`
+            : `Initial video loading complete. Found ${lastVideoCount} videos. Preparing detailed scan...`;
+    }
+    if(finalLoadingMessageKey === 'maxScrollAttemptsReachedLoading') finalMsgText = finalMsgText.replace("{count}", lastVideoCount);
+    if(finalLoadingMessageKey === 'initialVideoLoadingComplete') finalMsgText = finalMsgText.replace("{count}", lastVideoCount);
+
+    this.updateSidebarStatusMessage(finalMsgText);
     await this.sleep(1000); // Give a small pause for user to read before next phase
   }
 
   async performViewportScanAndRenderScroll() {
-    this.updateSidebarStatusMessage("Preparing to scan all videos by scrolling...");
+    this.updateSidebarStatusMessage(this.getMsg('preparingScrollScan'));
     await this.sleep(1000); // Give user time to read message
 
     const videos = Array.from(document.querySelectorAll('ytd-playlist-video-renderer'));
     const totalVideos = videos.length;
 
     if (totalVideos === 0) {
-        this.updateSidebarStatusMessage("No videos found to scan by scrolling.");
+        this.updateSidebarStatusMessage(this.getMsg('noVideosForScrollScan'));
         await this.sleep(1500);
         return;
     }
 
-    this.updateSidebarStatusMessage(`Scanning playlist: Scrolling down (0% complete) to ensure all ${totalVideos} videos render their details.`);
+    let scrollScanMsg = this.getMsg('scrollScanProgress') || "Scanning playlist: Scrolling down ({percent}% complete) to ensure video {current}/{total} renders.";    
+    this.updateSidebarStatusMessage(scrollScanMsg.replace("{percent}", 0).replace("{current}", 0).replace("{total}", totalVideos));
 
     // Scroll Down, ensuring each item is centered in viewport
     for (let i = 0; i < totalVideos; i++) {
         videos[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
         const percent = Math.round(((i + 1) / totalVideos) * 100);
-        this.updateSidebarStatusMessage(`Scanning playlist: Scrolling down (${percent}% complete) to ensure video ${i + 1}/${totalVideos} renders.`);
+        this.updateSidebarStatusMessage(scrollScanMsg.replace("{percent}", percent).replace("{current}", i+1).replace("{total}", totalVideos));
         await this.sleep(250); // Time for rendering. Adjust if needed based on playlist size/performance.
     }
     
-    this.updateSidebarStatusMessage("Scanning playlist: Reached bottom. Scrolling back to top...");
+    this.updateSidebarStatusMessage(this.getMsg('scrollScanReachedBottom'));
     await this.sleep(1000);
 
     // Scroll back to Top smoothly
@@ -283,7 +329,7 @@ class YouTubeWatchLaterCleaner {
         }, 3000 + totalVideos * 50); // Adjust timeout based on list length, e.g., 3s + 50ms per video for scroll up
     });
 
-    this.updateSidebarStatusMessage("Viewport scan complete. Analyzing videos for cleaning...");
+    this.updateSidebarStatusMessage(this.getMsg('viewportScanComplete'));
     await this.sleep(500);
   }
 
@@ -372,13 +418,13 @@ class YouTubeWatchLaterCleaner {
 
     if (statusEl) {
       if (this.seenVideos.length === 0) { // No videos detected at all
-        statusEl.textContent = browser.i18n.getMessage('noVideosToClean');
+        statusEl.textContent = this.getMsg('noVideosToClean');
         cleanBtn?.setAttribute('disabled', 'true');
       } else if (numSelected === 0) { // Videos detected, but all are deselected
-        statusEl.textContent = browser.i18n.getMessage('noVideosSelectedForCleaning');
+        statusEl.textContent = this.getMsg('noVideosSelectedForCleaning');
         cleanBtn?.setAttribute('disabled', 'true');
       } else {
-        statusEl.textContent = browser.i18n.getMessage('videosSelectedForCleaning').replace('{count}', numSelected);
+        statusEl.textContent = this.getMsg('videosSelectedForCleaning').replace('{count}', numSelected);
         cleanBtn?.removeAttribute('disabled');
       }
     }
@@ -391,7 +437,7 @@ class YouTubeWatchLaterCleaner {
     }
 
     if (this.settings.requireConfirmation) {
-      const message = browser.i18n.getMessage('confirmCleanSelected').replace('{count}', videosToClean.length);
+      const message = this.getMsg('confirmCleanSelected').replace('{count}', videosToClean.length);
       if (!confirm(message)) {
         return;
       }
@@ -405,7 +451,7 @@ class YouTubeWatchLaterCleaner {
     const cleanBtn = document.getElementById('wl-clean-btn');
     
     if (statusEl) {
-      statusEl.textContent = browser.i18n.getMessage('cleaning');
+      statusEl.textContent = this.getMsg('cleaning');
     }
     if (cleanBtn) {
       cleanBtn.disabled = true;
@@ -418,7 +464,7 @@ class YouTubeWatchLaterCleaner {
         this.lastCleanedCount++;
         await this.logCleanedVideo(video);
         if (this.settings.enableToast) {
-          this.showToast(browser.i18n.getMessage('videoRemoved').replace('{title}', video.title));
+          this.showToast(this.getMsg('videoRemoved').replace('{title}', video.title));
         }
       } else {
         this.failedCleanings.push(video);
@@ -432,7 +478,7 @@ class YouTubeWatchLaterCleaner {
     
     if (cleanBtn) {
       cleanBtn.disabled = false;
-      cleanBtn.textContent = browser.i18n.getMessage('cleanNow');
+      cleanBtn.textContent = this.getMsg('cleanNow');
     }
 
     setTimeout(() => {
@@ -546,15 +592,15 @@ class YouTubeWatchLaterCleaner {
 
     let logText = '';
     if (this.lastCleanedCount > 0) {
-      logText += browser.i18n.getMessage('cleanComplete').replace('{count}', this.lastCleanedCount);
+      logText += this.getMsg('cleanComplete').replace('{count}', this.lastCleanedCount);
     }
     
     if (this.failedCleanings.length > 0) {
-      logText += `\n${this.failedCleanings.length} ${browser.i18n.getMessage('failed')}`;
+      logText += `\n${this.failedCleanings.length} ${this.getMsg('failed')}`;
     }
 
     if (!logText) {
-      logText = browser.i18n.getMessage('noVideosToClean');
+      logText = this.getMsg('noVideosToClean');
     }
 
     logContent.textContent = logText;
@@ -619,6 +665,37 @@ class YouTubeWatchLaterCleaner {
 
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Add a getMsg helper to the class, using pre-loaded messages
+  getMsg(key, substitutions) {
+    const targetLang = this.settings.language || 'en';
+    let message = key; // Default to key itself if not found
+
+    if (this.loadedMessages && this.loadedMessages[targetLang] && this.loadedMessages[targetLang][key] && this.loadedMessages[targetLang][key].message) {
+      message = this.loadedMessages[targetLang][key].message;
+    } else if (targetLang === 'en' && browser.i18n.getMessage(key)) { // Fallback to default for EN or if not loaded
+        message = browser.i18n.getMessage(key);
+    } else { // Try global i18n as last resort if available (might pick up browser default)
+        try {
+            const i18nMsg = browser.i18n.getMessage(key);
+            if (i18nMsg !== key) message = i18nMsg; // Only use if it found something
+        } catch(e) { /* ignore error if key not found */ }
+    }
+    
+    if (substitutions) {
+        if (Array.isArray(substitutions)) {
+            for (let i = 0; i < substitutions.length; i++) {
+                 message = message.replace(`$${i+1}$`, substitutions[i])
+                                .replace(`{${i}}`, substitutions[i]); // Support {0}, {1} style placeholders
+            }
+        } else if (typeof substitutions === 'object') {
+            for (const k in substitutions) {
+                message = message.replace(new RegExp(`{${k}}`, 'g'), substitutions[k]);
+            }
+        }
+    }
+    return message;
   }
 }
 
