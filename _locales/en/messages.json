@@ -1,0 +1,74 @@
+{
+  "extensionName": {
+    "message": "YouTube Watch Later Cleaner"
+  },
+  "extensionDescription": {
+    "message": "Clean your YouTube Watch Later playlist by removing seen videos based on progress bar detection"
+  },
+  "popupTitle": {
+    "message": "Watch Later DOM Cleaner"
+  },
+  "settingsEnableFeature": {
+    "message": "Activate Cleaner on Watch Later Page (Requires page reload)"
+  },
+  "settingsEnableFeatureDescription": {
+    "message": "Activates all video scanning, highlighting, and cleaning features on the YouTube Watch Later page."
+  },
+  "settingsRequireConfirmation": {
+    "message": "Ask confirmation before cleaning"
+  },
+  "settingsThreshold": {
+    "message": "Threshold for \"seen\" videos"
+  },
+  "settingsEnableToast": {
+    "message": "Enable toast notifications"
+  },
+  "settingsLanguage": {
+    "message": "Language"
+  },
+  "cleanedVideos": {
+    "message": "Cleaned videos:"
+  },
+  "sidebarTitle": {
+    "message": "Watch Later Cleaner"
+  },
+  "seenVideosDetected": {
+    "message": "seen videos detected"
+  },
+  "cleanNow": {
+    "message": "Clean Now"
+  },
+  "cleaningLog": {
+    "message": "Cleaning log:"
+  },
+  "failed": {
+    "message": "failed"
+  },
+  "details": {
+    "message": "details"
+  },
+  "videoRemoved": {
+    "message": "Video \"{title}\" removed from Watch Later"
+  },
+  "confirmClean": {
+    "message": "Are you sure you want to remove {count} videos from Watch Later?"
+  },
+  "scanning": {
+    "message": "Scanning for seen videos..."
+  },
+  "cleaning": {
+    "message": "Cleaning videos..."
+  },
+  "cleanComplete": {
+    "message": "Cleaning complete! Removed {count} videos."
+  },
+  "noVideosToClean": {
+    "message": "No seen videos found to clean."
+  },
+  "cleaningFailed": {
+    "message": "Failed to remove video: {title}"
+  },
+  "scrollingToLoad": {
+    "message": "Loading more videos..."
+  }
+} 

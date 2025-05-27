@@ -1,0 +1,74 @@
+{
+  "extensionName": {
+    "message": "Nettoyeur YouTube À Regarder Plus Tard"
+  },
+  "extensionDescription": {
+    "message": "Nettoyez votre playlist YouTube À Regarder Plus Tard en supprimant les vidéos vues basé sur la détection de la barre de progression"
+  },
+  "popupTitle": {
+    "message": "Nettoyeur DOM À Regarder Plus Tard"
+  },
+  "settingsEnableFeature": {
+    "message": "Activer le nettoyeur sur la page À Regarder Plus Tard ( Requiert un rechargement de la page)"
+  },
+  "settingsEnableFeatureDescription": {
+    "message": "Active toutes les fonctionnalités d'analyse, de surlignage et de nettoyage des vidéos sur la page YouTube À Regarder Plus Tard."
+  },
+  "settingsRequireConfirmation": {
+    "message": "Demander confirmation avant nettoyage"
+  },
+  "settingsThreshold": {
+    "message": "Seuil pour les vidéos \"vues\""
+  },
+  "settingsEnableToast": {
+    "message": "Activer les notifications toast"
+  },
+  "settingsLanguage": {
+    "message": "Langue"
+  },
+  "cleanedVideos": {
+    "message": "Vidéos nettoyées :"
+  },
+  "sidebarTitle": {
+    "message": "Nettoyeur À Regarder Plus Tard"
+  },
+  "seenVideosDetected": {
+    "message": "vidéos vues détectées"
+  },
+  "cleanNow": {
+    "message": "Nettoyer Maintenant"
+  },
+  "cleaningLog": {
+    "message": "Journal de nettoyage :"
+  },
+  "failed": {
+    "message": "échoué"
+  },
+  "details": {
+    "message": "détails"
+  },
+  "videoRemoved": {
+    "message": "Vidéo \"{title}\" supprimée d'À Regarder Plus Tard"
+  },
+  "confirmClean": {
+    "message": "Êtes-vous sûr de vouloir supprimer {count} vidéos d'À Regarder Plus Tard ?"
+  },
+  "scanning": {
+    "message": "Recherche de vidéos vues..."
+  },
+  "cleaning": {
+    "message": "Nettoyage des vidéos..."
+  },
+  "cleanComplete": {
+    "message": "Nettoyage terminé ! {count} vidéos supprimées."
+  },
+  "noVideosToClean": {
+    "message": "Aucune vidéo vue trouvée à nettoyer."
+  },
+  "cleaningFailed": {
+    "message": "Échec de la suppression de la vidéo : {title}"
+  },
+  "scrollingToLoad": {
+    "message": "Chargement de plus de vidéos..."
+  }
+} 

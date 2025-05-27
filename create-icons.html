@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Extension Icons</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        canvas { border: 1px solid #ccc; margin: 10px; }
+        .icon-group { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>YouTube Watch Later Cleaner - Icon Generator</h1>
+    <p>This page generates the required icon files for the Firefox extension.</p>
+    
+    <div class="icon-group">
+        <h3>Extension Icons</h3>
+        <canvas id="icon16" width="16" height="16"></canvas>
+        <canvas id="icon32" width="32" height="32"></canvas>
+        <canvas id="icon48" width="48" height="48"></canvas>
+        <canvas id="icon96" width="96" height="96"></canvas>
+    </div>
+
+    <div>
+        <button onclick="downloadAll()">Download All Icons</button>
+        <p>Right-click each canvas and "Save image as..." to save the icons to the icons/ folder.</p>
+    </div>
+
+    <script>
+        function createIcon(size) {
+            const canvas = document.getElementById(`icon${size}`);
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = '#1a73e8';
+            ctx.fillRect(0, 0, size, size);
+            
+            // YouTube play button style
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const triangleSize = size * 0.3;
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(centerX - triangleSize * 0.5, centerY - triangleSize * 0.6);
+            ctx.lineTo(centerX - triangleSize * 0.5, centerY + triangleSize * 0.6);
+            ctx.lineTo(centerX + triangleSize * 0.6, centerY);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Clean/remove symbol (X)
+            ctx.strokeStyle = '#ff4444';
+            ctx.lineWidth = Math.max(1, size / 16);
+            ctx.lineCap = 'round';
+            
+            const xSize = size * 0.15;
+            const xOffset = size * 0.7;
+            const yOffset = size * 0.25;
+            
+            ctx.beginPath();
+            ctx.moveTo(xOffset - xSize, yOffset - xSize);
+            ctx.lineTo(xOffset + xSize, yOffset + xSize);
+            ctx.moveTo(xOffset + xSize, yOffset - xSize);
+            ctx.lineTo(xOffset - xSize, yOffset + xSize);
+            ctx.stroke();
+        }
+
+        // Generate all icon sizes
+        [16, 32, 48, 96].forEach(size => createIcon(size));
+
+        function downloadAll() {
+            [16, 32, 48, 96].forEach(size => {
+                const canvas = document.getElementById(`icon${size}`);
+                const link = document.createElement('a');
+                link.download = `icon-${size}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        // Auto-create icons directory structure hint
+        console.log('Create an "icons" folder and save the generated images as:');
+        console.log('- icons/icon-16.png');
+        console.log('- icons/icon-32.png');
+        console.log('- icons/icon-48.png');
+        console.log('- icons/icon-96.png');
+    </script>
+</body>
+</html> 
