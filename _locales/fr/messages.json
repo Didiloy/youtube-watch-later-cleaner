@@ -70,5 +70,14 @@
   },
   "scrollingToLoad": {
     "message": "Chargement de plus de vidéos..."
+  },
+  "videosSelectedForCleaning": {
+    "message": "{count} vidéos sélectionnées pour le nettoyage. Cliquez sur une vidéo pour l'exclure."
+  },
+  "noVideosSelectedForCleaning": {
+    "message": "Aucune vidéo sélectionnée pour le nettoyage. Cliquez sur une vidéo surlignée pour l'inclure."
+  },
+  "confirmCleanSelected": {
+    "message": "Êtes-vous sûr de vouloir supprimer les {count} vidéos sélectionnées d'À Regarder Plus Tard ?"
   }
 } 

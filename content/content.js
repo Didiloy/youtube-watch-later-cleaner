@@ -151,7 +151,8 @@ class YouTubeWatchLaterCleaner {
           element: video,
           index: index,
           title: this.extractVideoTitle(video),
-          url: this.extractVideoUrl(video)
+          url: this.extractVideoUrl(video),
+          deselected: false // Initialize deselection state
         });
       }
     });
@@ -330,36 +331,67 @@ class YouTubeWatchLaterCleaner {
 
   highlightSeenVideos() {
     document.querySelectorAll('.wl-seen-highlight').forEach(el => {
-      el.classList.remove('wl-seen-highlight');
+      el.classList.remove('.wl-seen-highlight', '.wl-deselected-highlight');
+      // Clean up old listeners if any - more robust to re-create or manage listeners carefully
+      const oldClickListener = el.clickListenerRef; // Assuming we store it
+      if (oldClickListener) {
+        el.removeEventListener('click', oldClickListener);
+      }
     });
 
     this.seenVideos.forEach(video => {
       video.element.classList.add('wl-seen-highlight');
+      if (video.deselected) {
+        video.element.classList.add('wl-deselected-highlight');
+      }
+
+      // Store and use a reference for easy removal if needed, or bind a new one
+      const clickListener = (event) => {
+        // Prevent click from propagating to YT player or links if badge is part of video thumbnail
+        event.preventDefault();
+        event.stopPropagation();
+        this.toggleDeselection(video);
+      };
+      video.element.clickListenerRef = clickListener; // Store ref for potential removal
+      video.element.addEventListener('click', clickListener);
+      video.element.style.cursor = 'pointer'; // Indicate the whole item is clickable for deselection
     });
+  }
+
+  toggleDeselection(videoToToggle) {
+    videoToToggle.deselected = !videoToToggle.deselected;
+    videoToToggle.element.classList.toggle('wl-deselected-highlight', videoToToggle.deselected);
+    this.updateSidebarStatus(); // Update count of videos to be cleaned
   }
 
   updateSidebarStatus() {
     const statusEl = document.getElementById('wl-status');
     const cleanBtn = document.getElementById('wl-clean-btn');
-    
+    const currentlySelectedVideos = this.seenVideos.filter(v => !v.deselected);
+    const numSelected = currentlySelectedVideos.length;
+
     if (statusEl) {
-      if (this.seenVideos.length === 0) {
+      if (this.seenVideos.length === 0) { // No videos detected at all
         statusEl.textContent = browser.i18n.getMessage('noVideosToClean');
         cleanBtn?.setAttribute('disabled', 'true');
+      } else if (numSelected === 0) { // Videos detected, but all are deselected
+        statusEl.textContent = browser.i18n.getMessage('noVideosSelectedForCleaning');
+        cleanBtn?.setAttribute('disabled', 'true');
       } else {
-        statusEl.textContent = `${this.seenVideos.length} ${browser.i18n.getMessage('seenVideosDetected')}`;
+        statusEl.textContent = browser.i18n.getMessage('videosSelectedForCleaning').replace('{count}', numSelected);
         cleanBtn?.removeAttribute('disabled');
       }
     }
   }
 
   async startCleaning() {
-    if (this.cleaningInProgress || this.seenVideos.length === 0) {
+    const videosToClean = this.seenVideos.filter(v => !v.deselected);
+    if (this.cleaningInProgress || videosToClean.length === 0) {
       return;
     }
 
     if (this.settings.requireConfirmation) {
-      const message = browser.i18n.getMessage('confirmClean').replace('{count}', this.seenVideos.length);
+      const message = browser.i18n.getMessage('confirmCleanSelected').replace('{count}', videosToClean.length);
       if (!confirm(message)) {
         return;
       }
@@ -380,7 +412,7 @@ class YouTubeWatchLaterCleaner {
       cleanBtn.textContent = 'Cleaning...';
     }
 
-    for (const video of this.seenVideos) {
+    for (const video of videosToClean) {
       const success = await this.removeVideo(video);
       if (success) {
         this.lastCleanedCount++;

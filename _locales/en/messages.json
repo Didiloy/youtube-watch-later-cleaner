@@ -70,5 +70,14 @@
   },
   "scrollingToLoad": {
     "message": "Loading more videos..."
+  },
+  "videosSelectedForCleaning": {
+    "message": "{count} videos selected for cleaning. Click a video to exclude it."
+  },
+  "noVideosSelectedForCleaning": {
+    "message": "No videos selected for cleaning. Click a highlighted video to include it."
+  },
+  "confirmCleanSelected": {
+    "message": "Are you sure you want to remove {count} selected videos from Watch Later?"
   }
 } 

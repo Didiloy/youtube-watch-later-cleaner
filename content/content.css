@@ -136,6 +136,20 @@
   font-weight: bold;
   z-index: 10;
   pointer-events: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* Style for deselected videos */
+.wl-seen-highlight.wl-deselected-highlight {
+  outline: 3px solid #cccccc !important; /* Grey outline for deselected */
+  background: rgba(200, 200, 200, 0.05) !important;
+}
+
+.wl-seen-highlight.wl-deselected-highlight::before {
+  background: #aaaaaa; /* Grey badge background */
+  text-decoration: line-through; /* Strikethrough text */
+  content: '❌ EXCLUDED'; /* Change badge text */
 }
 
 #wl-toast-container {
