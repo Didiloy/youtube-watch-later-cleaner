@@ -115,5 +115,21 @@
   },
   "refreshingList": {
     "message": "Refreshing..."
+  },
+  "languageLabel": {
+    "message": "Language:",
+    "description": "Label for the language selection dropdown in settings."
+  },
+  "autoRescanAfterCleaningLabel": {
+    "message": "Auto-rescan after cleaning",
+    "description": "Label for the checkbox to enable/disable auto-rescanning after cleaning videos."
+  },
+  "settingsSavedSuccess": {
+    "message": "Settings saved successfully!",
+    "description": "Status message shown when settings are saved successfully from the popup."
+  },
+  "settingsSavedError": {
+    "message": "Failed to save settings. Please try again.",
+    "description": "Status message shown when settings fail to save from the popup."
   }
 } 

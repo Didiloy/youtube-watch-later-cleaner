@@ -79,7 +79,8 @@ class YouTubeWatchLaterCleaner {
           requireConfirmation: true,
           threshold: 75,
           enableToast: true,
-          language: 'en'
+          language: 'en',
+          autoRescanAfterCleaning: true
         };
       }
     } catch (error) {
@@ -89,7 +90,8 @@ class YouTubeWatchLaterCleaner {
         requireConfirmation: true,
         threshold: 75,
         enableToast: true,
-        language: 'en'
+        language: 'en',
+        autoRescanAfterCleaning: true
       };
     }
   }
@@ -548,9 +550,12 @@ class YouTubeWatchLaterCleaner {
       cleanBtn.textContent = this.getMsg('cleanNow');
     }
 
-    setTimeout(() => {
-      this.scanForSeenVideos();
-    }, 2000);
+    // Only rescan if the setting is enabled
+    if (this.settings.autoRescanAfterCleaning) {
+      setTimeout(() => {
+        this.scanForSeenVideos();
+      }, 2000);
+    }
   }
 
   async removeVideo(video) {

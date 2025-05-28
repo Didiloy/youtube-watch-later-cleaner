@@ -62,6 +62,7 @@ This Firefox extension enhances the YouTube Watch Later playlist page by visuall
 * Enable floating sidebar on playlist: \[ON/OFF]
 * Enable toast notifications: \[ON/OFF]
 * Language: \[EN/FR]
+* Auto-rescan after cleaning: \[ON/OFF]
 
 ---
 
@@ -78,6 +79,7 @@ This Firefox extension enhances the YouTube Watch Later playlist page by visuall
 |  [50%] Threshold for "seen"           |
 |  [✓]  Enable toast                     |
 |  Language: [EN ▾]                      |
+|  [✓]  Auto-rescan after cleaning       |
 |----------------------------------------|
 |  Cleaned videos:                       |
 |  • Video Title 1   - 2025-05-23      |

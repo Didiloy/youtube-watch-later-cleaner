@@ -115,5 +115,21 @@
   },
   "refreshingList": {
     "message": "Rafraîchissement..."
+  },
+  "languageLabel": {
+    "message": "Langue :",
+    "description": "Étiquette pour le menu déroulant de sélection de la langue dans les paramètres."
+  },
+  "autoRescanAfterCleaningLabel": {
+    "message": "Relancer l'analyse après nettoyage",
+    "description": "Étiquette pour la case à cocher permettant d'activer/désactiver la relance automatique de l'analyse après le nettoyage des vidéos."
+  },
+  "settingsSavedSuccess": {
+    "message": "Paramètres enregistrés avec succès !",
+    "description": "Message d'état affiché lorsque les paramètres sont enregistrés avec succès depuis le popup."
+  },
+  "settingsSavedError": {
+    "message": "Échec de l'enregistrement des paramètres. Veuillez réessayer.",
+    "description": "Message d'état affiché lorsque l'enregistrement des paramètres échoue depuis le popup."
   }
 } 

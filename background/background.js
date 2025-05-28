@@ -11,6 +11,7 @@ class BackgroundManager {
       threshold: 75,
       enableToast: true,
       language: 'en',
+      autoRescanAfterCleaning: true,
       cleanedVideos: []
     };
 
@@ -56,7 +57,8 @@ class BackgroundManager {
         'requireConfirmation', 
         'threshold',
         'enableToast',
-        'language'
+        'language',
+        'autoRescanAfterCleaning'
       ]);
       return { success: true, settings };
     } catch (error) {

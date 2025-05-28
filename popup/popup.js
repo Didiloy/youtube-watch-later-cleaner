@@ -18,9 +18,28 @@ class PopupManager {
       const response = await browser.runtime.sendMessage({ type: 'GET_SETTINGS' });
       if (response.success) {
         this.settings = response.settings;
+        this.settings.autoRescanAfterCleaning = this.settings.autoRescanAfterCleaning === undefined ? true : this.settings.autoRescanAfterCleaning;
+      } else {
+        console.error('Failed to load settings:', response.error);
+        this.settings = {
+          enableSidebar: true,
+          requireConfirmation: true,
+          threshold: 75,
+          enableToast: true,
+          language: 'en',
+          autoRescanAfterCleaning: true
+        };
       }
     } catch (error) {
       console.error('Failed to load settings:', error);
+      this.settings = {
+        enableSidebar: true,
+        requireConfirmation: true,
+        threshold: 75,
+        enableToast: true,
+        language: 'en',
+        autoRescanAfterCleaning: true
+      };
     }
   }
 
@@ -57,6 +76,10 @@ class PopupManager {
       setTimeout(() => window.location.reload(), 100);
     });
 
+    document.getElementById('autoRescanAfterCleaning').addEventListener('change', (e) => {
+      this.updateSetting('autoRescanAfterCleaning', e.target.checked);
+    });
+
     document.getElementById('refreshVideos').addEventListener('click', () => {
       this.refreshVideosList();
     });
@@ -64,6 +87,12 @@ class PopupManager {
     document.getElementById('clearHistory').addEventListener('click', () => {
       this.clearHistory();
     });
+
+    const enableToastCheckbox = document.getElementById('enableToast');
+    const languageSelect = document.getElementById('language');
+    const autoRescanCheckbox = document.getElementById('autoRescanAfterCleaning');
+    const cleanedVideosList = document.getElementById('cleanedVideosList');
+    const noVideosMessage = document.getElementById('noVideos');
   }
 
   async updateSetting(key, value) {
@@ -72,11 +101,11 @@ class PopupManager {
     try {
       await browser.runtime.sendMessage({
         type: 'SAVE_SETTINGS',
-        settings: { [key]: value }
+        settings: this.settings
       });
     } catch (error) {
-      console.error('Failed to save setting:', error);
-      this.showStatus('Failed to save settings', 'error');
+      console.error('Failed to save setting:', key, error);
+      this.showStatus(this.getLocalizedMessage('settingSavedError', { settingName: key }) || `Failed to save ${key}.`, 'error');
     }
   }
 
@@ -86,6 +115,7 @@ class PopupManager {
     document.getElementById('threshold').value = this.settings.threshold || 75;
     document.getElementById('enableToast').checked = this.settings.enableToast !== false;
     document.getElementById('language').value = this.settings.language || 'en';
+    document.getElementById('autoRescanAfterCleaning').checked = this.settings.autoRescanAfterCleaning === undefined ? true : this.settings.autoRescanAfterCleaning;
     
     this.renderCleanedVideos();
   }
@@ -207,46 +237,56 @@ class PopupManager {
 
   async localizeInterface() {
     const elements = document.querySelectorAll('[data-i18n]');
-    const targetLang = this.settings.language || 'en';
-    let messages = {};
 
-    try {
-      // Attempt to fetch the specific language file if not English (default)
-      // browser.i18n.getMessage will handle English or browser default automatically if targetLang is 'en'
-      // or if the specific fetch fails and we fall back.
-      if (targetLang !== 'en') { 
-        const response = await fetch(browser.runtime.getURL(`_locales/${targetLang}/messages.json`));
-        if (response.ok) {
-          messages = await response.json();
+    elements.forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const message = this.getLocalizedMessage(key);
+      if (message && message !== key) {
+        if (el.tagName === 'INPUT' && el.type === 'submit' || el.tagName === 'BUTTON') {
+          el.value = message;
+        } else if (el.hasAttribute('data-i18n-placeholder')) {
+          el.placeholder = message;
         } else {
-          // Fallback to default i18n if specific lang file fails to load (e.g. not found)
-          console.warn(`Could not load messages for ${targetLang}, falling back to default i18n.`);
+          el.textContent = message;
         }
       }
-    } catch (error) {
-      console.error(`Error loading messages for ${targetLang}:`, error);
-      // Fallback to default i18n on any error
-    }
 
-    elements.forEach(element => {
-      const key = element.getAttribute('data-i18n');
-      let message = '';
-
-      if (messages[key] && messages[key].message) {
-        message = messages[key].message;
-      } else {
-        // Fallback to browser.i18n.getMessage() if key not in loaded file or if it's default lang
-        message = browser.i18n.getMessage(key);
-      }
-      
-      if (message) {
-        if (element.tagName === 'INPUT' && element.type === 'button') {
-          element.value = message;
-        } else {
-          element.textContent = message;
+      const labelKey = el.getAttribute('data-i18n-label');
+      if (labelKey) {
+        const labelMessage = this.getLocalizedMessage(labelKey);
+        if (labelMessage && labelMessage !== labelKey) {
+          const labelElement = document.querySelector(`label[for="${el.id}"]`) || el.previousElementSibling;
+          if (labelElement && (labelElement.tagName === 'LABEL' || labelElement.classList.contains('setting-label'))) {
+            const spanInsideLabel = labelElement.querySelector('span[data-i18n]') || labelElement.querySelector('span');
+            if(spanInsideLabel) spanInsideLabel.textContent = labelMessage;
+            else labelElement.textContent = labelMessage;
+          }
         }
       }
     });
+  }
+
+  getLocalizedMessage(key, substitutions) {
+    try {
+      let message = browser.i18n.getMessage(key);
+      if (!message) return key;
+
+      if (substitutions) {
+        if (Array.isArray(substitutions)) {
+            for (let i = 0; i < substitutions.length; i++) {
+                 message = message.replace(`$${i+1}$`, substitutions[i])
+                                .replace(`{${i}}`, substitutions[i]);
+            }
+        } else if (typeof substitutions === 'object') {
+            for (const k in substitutions) {
+                message = message.replace(new RegExp(`{${k}}`, 'g'), substitutions[k]);
+            }
+        }
+      }
+      return message;
+    } catch (e) {
+      return key;
+    }
   }
 }
 
